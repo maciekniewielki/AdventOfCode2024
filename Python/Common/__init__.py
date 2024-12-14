@@ -17,6 +17,11 @@ def input_as_ints(filename):
     line_as_int = lambda l: int(l.rstrip('\n'))
     return list(map(line_as_int, lines))
 
+def input_as_lists_of_ints(filename):
+    """Return a list where each line in the input file is an element of the list, converted into an integer list"""
+    lines = input_as_lines(filename)
+    return [list(map(int, (line.split()))) for line in lines]
+
 
 def input_as_columns(filename):
     """Return a list where each column in the input file is a element of the list"""
@@ -25,7 +30,7 @@ def input_as_columns(filename):
 
 
 def input_as_column_ints(filename):
-    """Return a list where each column in the input file is a element of the list"""
+    """Return a list where each column in the input file is a element of the list, converted into an integer"""
     columns = input_as_columns(filename)
     return [list(map(int, col)) for col in columns]
 
