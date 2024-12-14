@@ -28,7 +28,7 @@ def find_instructions(data, only_mult=True):
     if only_mult:
         regex = regex_mult
     else:
-        regex = f"(?:{regex_mult})|(?:{regex_do})|(?:{regex_dont})"
+        regex = f"{regex_mult}|{regex_do}|{regex_dont}"
 
     # Convert don't to don_t
     return map(lambda x: x.replace("'", "_"), re.findall(regex, data))
