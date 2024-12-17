@@ -75,18 +75,12 @@ def solve1(board):
 def solve2(board):
     starting_pos, obstacles = identify_entities(board)
     reachable_positions = get_reachable_positions(board)
-    looping_count = 0
-    for j in range(len(board)):
-        for i in range(len(board[j])):
-            # Optimization -- we only care about putting obstacles
-            # if they are in a place the guard will visit
-            if (i, j) not in reachable_positions:
-                continue
-            obstacles_with_obstruction = set(obstacles)
-            obstacles_with_obstruction.add((i, j))
-            if loops(board, obstacles_with_obstruction, starting_pos):
-                looping_count += 1
-    return looping_count
+    # We only care about putting obstacles
+    # if they are in a place the guard will visit
+    return sum(
+        loops(board, set(obstacles) | {(i, j)}, starting_pos)
+        for i, j in reachable_positions
+    )
 
 
 # IO
