@@ -6,22 +6,6 @@ DOWN = (0, 1)
 LEFT = (-1, 0)
 RIGHT = (1, 0)
 
-direction_character = {UP: "^", DOWN: "v", LEFT: "<", RIGHT: ">"}
-
-
-def print_board(obstacles, current_pos, current_direction, width, height):
-    for j in range(height):
-        for i in range(width):
-            if (i, j) in obstacles:
-                to_print = "#"
-            elif (i, j) == current_pos:
-                to_print = direction_character[current_direction]
-            else:
-                to_print = "."
-            print(to_print, end="")
-
-        print()
-
 
 def identify_entities(board):
     obstacles = set()
@@ -51,11 +35,30 @@ def one_step(obstacles, current_pos, current_direction, moves):
     return new_pos, current_direction
 
 
+def loops(board, obstacles, starting_pos):
+    current_pos = starting_pos
+    moves = cycle([UP, RIGHT, DOWN, LEFT])
+    current_direction = next(moves)
+    guard_states = set()
+    while inside(board, current_pos):
+        current_state = current_pos + current_direction
+        # If guard is a second time with the same position and direction
+        # then this has to be a loop
+        if current_state in guard_states:
+            return True
+        guard_states.add(current_state)
+        current_pos, current_direction = one_step(
+            obstacles, current_pos, current_direction, moves
+        )
+
+    return False
+
+
 def solve1(board):
     current_pos, obstacles = identify_entities(board)
-    current_direction = UP
-    seen = set()
     moves = cycle([UP, RIGHT, DOWN, LEFT])
+    current_direction = next(moves)
+    seen = set()
     while inside(board, current_pos):
         seen.add(current_pos)
         current_pos, current_direction = one_step(
@@ -63,17 +66,28 @@ def solve1(board):
         )
     return len(seen)
 
-
-def solve2(updates, lookup):
-    pass
+# This can take a minute or so to run
+def solve2(board):
+    starting_pos, obstacles = identify_entities(board)
+    looping_count = 0
+    for j in range(len(board)):
+        for i in range(len(board[j])):
+            if (i, j) == starting_pos or (i, j) in obstacles:
+                continue
+            obstacles_with_obstruction = set(obstacles)
+            obstacles_with_obstruction.add((i, j))
+            if loops(board, obstacles_with_obstruction, starting_pos):
+                looping_count += 1
+    return looping_count
 
 
 # IO
 a = input_as_2d_grid("input.txt")
+
 
 # 1st
 print(solve1(a))
 
 
 # 2nd
-# print(solve2(a))
+print(solve2(a))
