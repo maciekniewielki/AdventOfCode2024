@@ -35,6 +35,19 @@ def one_step(obstacles, current_pos, current_direction, moves):
     return new_pos, current_direction
 
 
+def get_reachable_positions(board):
+    current_pos, obstacles = identify_entities(board)
+    moves = cycle([UP, RIGHT, DOWN, LEFT])
+    current_direction = next(moves)
+    seen = set()
+    while inside(board, current_pos):
+        seen.add(current_pos)
+        current_pos, current_direction = one_step(
+            obstacles, current_pos, current_direction, moves
+        )
+    return seen
+
+
 def loops(board, obstacles, starting_pos):
     current_pos = starting_pos
     moves = cycle([UP, RIGHT, DOWN, LEFT])
@@ -55,24 +68,19 @@ def loops(board, obstacles, starting_pos):
 
 
 def solve1(board):
-    current_pos, obstacles = identify_entities(board)
-    moves = cycle([UP, RIGHT, DOWN, LEFT])
-    current_direction = next(moves)
-    seen = set()
-    while inside(board, current_pos):
-        seen.add(current_pos)
-        current_pos, current_direction = one_step(
-            obstacles, current_pos, current_direction, moves
-        )
-    return len(seen)
+    return len(get_reachable_positions(board))
 
-# This can take a minute or so to run
+
+# This can take a couple of seconds to run
 def solve2(board):
     starting_pos, obstacles = identify_entities(board)
+    reachable_positions = get_reachable_positions(board)
     looping_count = 0
     for j in range(len(board)):
         for i in range(len(board[j])):
-            if (i, j) == starting_pos or (i, j) in obstacles:
+            # Optimization -- we only care about putting obstacles
+            # if they are in a place the guard will visit
+            if (i, j) not in reachable_positions:
                 continue
             obstacles_with_obstruction = set(obstacles)
             obstacles_with_obstruction.add((i, j))
