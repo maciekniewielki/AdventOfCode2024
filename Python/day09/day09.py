@@ -17,6 +17,34 @@ def compact_blocks(blocks):
     return compacted
 
 
+def compact_chunks(chunks):
+    highest_id = max(filter(lambda c: c[0] is not None, chunks), key=lambda c: c[0])[0]
+    for id in range(highest_id, 0, -1):
+        try_insert_chunk(chunks, id)
+    return chunks
+
+
+def try_insert_chunk(chunks, chunk_id):
+    upper = None
+    for i in range(len(chunks) - 1, 0, -1):
+        if chunks[i][0] == chunk_id:
+            upper = i
+
+    for lower in range(upper):
+        if chunks[lower][0] is None and chunks[lower][1] == chunks[upper][1]:
+            # File is just the right size, just swap places
+            chunks[lower], chunks[upper] = chunks[upper], chunks[lower]
+            break
+        elif chunks[lower][0] is None and chunks[lower][1] > chunks[upper][1]:
+            # File is smaller than free space
+            free_space_left = chunks[lower][1] - chunks[upper][1]
+            # Insert whole file into the free space and free space into file
+            chunks[lower], chunks[upper] = chunks[upper], (None, chunks[upper][1])
+            # Add leftover free space after the file
+            chunks.insert(lower + 1, (None, free_space_left))
+            break
+
+
 def calc_checksum(blocks):
     return sum(
         block_id * chunk_id
@@ -25,31 +53,39 @@ def calc_checksum(blocks):
     )
 
 
-def solve1(blocks):
-    compacted = compact_blocks(blocks)
-    return calc_checksum(compacted)
+def blockify(chunks):
+    blocks = []
+    for chunk in chunks:
+        blocks += [chunk[0]] * chunk[1]
+    return blocks
+
+
+def solve1(chunks):
+    blocks = blockify(chunks)
+    compacted_blocks = compact_blocks(blocks)
+    return calc_checksum(compacted_blocks)
 
 
 def solve2(chunks):
-    pass
+    compacted_chunks = compact_chunks(chunks)
+    compacted_blocks = blockify(compacted_chunks)
+    return calc_checksum(compacted_blocks)
 
 
 # IO
 a = input_as_string("input.txt")
-blocks = []
-# Chunks waiting for part 2
-# chunks = []
+
+
+chunks = []
 for file_id, space in enumerate(zip_longest(a[::2], a[1::2])):
     file_space, free_space = space
-    # chunks.append((chunk_id, int(file_space)))
-    blocks += [file_id] * int(file_space)
+    chunks.append((file_id, int(file_space)))
     if free_space:
-        blocks += [None] * int(free_space)
-        # chunks.append((None, int(free_space)))
+        chunks.append((None, int(free_space)))
 
 # 1st
-print(solve1(blocks))
+print(solve1(chunks))
 
 
 # 2nd
-# print(solve2(chunks))
+print(solve2(chunks))
