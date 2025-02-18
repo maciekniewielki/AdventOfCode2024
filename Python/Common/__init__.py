@@ -42,9 +42,9 @@ def input_as_column_ints(filename):
     return [list(map(int, col)) for col in columns]
 
 
-def input_as_one_line_ints(filename):
-    """Return a list where it splits the file by comma and converts each entry into an integer"""
-    entries = input_as_string(filename).split(",")
+def input_as_one_line_ints(filename, delim=","):
+    """Return a list where it splits the file by delimiter and converts each entry into an integer"""
+    entries = input_as_string(filename).split(delim)
     return list(map(int, entries))
 
 
